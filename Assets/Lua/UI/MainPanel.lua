@@ -1,0 +1,30 @@
+BasePanel:subClass("MainPanel")
+
+function MainPanel:Init(name)
+    self.base.Init(self, name)
+
+    self:GetComp("btn_Start", "Button").onClick:AddListener(
+        function()
+            self:ShowSelect()
+        end
+    )
+    -- self:GetComp("btn_Quit", "Button")
+    -- .onClick:AddListener(
+    --     function()
+
+    --     end
+    -- )
+
+    
+end
+
+function MainPanel:Update()
+    if Input.GetKeyDown(CS.UnityEngine.KeyCode.Escape) then
+        LevelSelect:Hide()
+    end
+end
+
+function MainPanel:ShowSelect()
+    LevelSelect:Show()
+end
+

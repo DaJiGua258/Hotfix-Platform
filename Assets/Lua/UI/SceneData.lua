@@ -1,0 +1,112 @@
+-- 当前所有的关卡
+SceneData = {
+    "Level1",
+    "Level2",
+    "Level3",
+}
+
+-- 关卡状态缓存 (从存档加载)
+LevelStates = {}
+
+-- int 设置为 -1 为未解锁
+-- 0 为解锁，同时表示分数
+-- 1 为通关但是没有获取金币
+-- 2 为通关但是没有完全获取金币
+-- 3 为通关并且获取全部金币
+
+CurrentLevel = ""
+
+-- 当前关卡运行时数据
+CurLevelData = {
+    score = 0,
+    maxCoin = 0,
+    coin = 0,
+    time = 0,
+}
+
+-- 重置数据
+function SceneData:ReSetData()
+    for k, v in ipairs(SceneData) do
+        PlayerPrefs.SetInt(v, -1)
+    end
+
+    -- 解锁第一关
+    PlayerPrefs.SetInt("Level1", 0)
+
+    PlayerPrefs.Save()
+end
+
+-- 初始化关卡数据
+function SceneData:InitData()
+    CurrentLevel = CS.UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
+    CurLevelData.coin = 0
+    CurLevelData.time = 0
+
+    -- 获取 CoinRoot 下所有 Coin 标签的子节点数量
+    local coinRoot = CS.UnityEngine.GameObject.Find("CoinRoot")
+    if coinRoot then
+        local children = coinRoot:GetComponentsInChildren(typeof(CS.UnityEngine.Transform))
+        local count = 0
+        for i = 0, children.Length - 1 do
+            if children[i].tag == "Coin" then
+                count = count + 1
+            end
+        end
+        CurLevelData.maxCoin = count
+    else
+        CurLevelData.maxCoin = 0
+    end
+
+    print("当前关卡:" .. CurrentLevel .. ", 金币总量:" .. CurLevelData.maxCoin)
+
+    -- 从存档初始化各关卡状态
+    for _, v in ipairs(SceneData) do
+        LevelStates[v] = PlayerPrefs.GetInt(v, -1)
+        print("关卡 " .. v .. " 状态:" .. LevelStates[v])
+    end
+end
+
+-- 收集金币
+function SceneData:AddCoin()
+    CurLevelData.coin = CurLevelData.coin + 1
+end
+
+-- 保存通关数据
+function SceneData:SaveData()
+    -- 根据金币收集比例计算分数（3 -> 1）
+    if CurLevelData.maxCoin == 0 or CurLevelData.coin >= CurLevelData.maxCoin then
+        CurLevelData.score = 3  -- 获取全部金币
+    elseif CurLevelData.coin > 0 then
+        CurLevelData.score = 2  -- 获取部分金币
+    else
+        CurLevelData.score = 1  -- 没有获取金币
+    end
+
+    -- 如果已有更高分数则不覆盖
+    local oldScore = PlayerPrefs.GetInt(CurrentLevel, -1)
+    if CurLevelData.score > oldScore then
+        PlayerPrefs.SetInt(CurrentLevel, CurLevelData.score)
+        PlayerPrefs.Save()
+    end
+
+    -- 解锁下一关
+    for i, v in ipairs(SceneData) do
+        if v == CurrentLevel then
+            local nextLevel = SceneData[i + 1]
+            if nextLevel and PlayerPrefs.GetInt(nextLevel, -1) < 0 then
+                PlayerPrefs.SetInt(nextLevel, 0)
+                LevelStates[nextLevel] = 0
+                PlayerPrefs.Save()
+                print("解锁下一关:" .. nextLevel)
+            end
+            break
+        end
+    end
+
+    print("通关:" .. CurrentLevel .. ", 分数:" .. CurLevelData.score)
+end
+
+-- 计时更新（每帧调用）
+function SceneData:Update()
+    CurLevelData.time = CurLevelData.time + CS.UnityEngine.Time.deltaTime
+end

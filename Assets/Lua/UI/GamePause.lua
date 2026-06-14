@@ -1,0 +1,39 @@
+BasePanel:subClass("GamePause")
+
+-- 初始化
+function GamePause:Init(name)
+    self.base.Init(self, name)
+
+    -- 重玩关卡：恢复时间、重载当前场景
+    self:GetComp("btn_ReStart", "Button").onClick:AddListener(
+        function()
+            CS.UnityEngine.Time.timeScale = 1
+            CS.UnityEngine.SceneManagement.SceneManager.LoadScene(CS.UnityEngine.SceneManagement.SceneManager.GetActiveScene().name)
+        end
+    )
+
+    -- 返回主菜单：恢复时间、跳转主场景
+    self:GetComp("btn_ReturnMain", "Button").onClick:AddListener(
+        function()
+            CS.UnityEngine.Time.timeScale = 1
+            CS.UnityEngine.SceneManagement.SceneManager.LoadScene("Main")
+        end
+    )
+
+    -- 退出游戏
+    self:GetComp("btn_Quit", "Button").onClick:AddListener(
+        function()
+            print("退出游戏")
+        end
+    )
+end
+
+-- 显示
+function GamePause:Show()
+    self.base.Show(self, "panel_Pause")
+end
+
+-- 隐藏
+function GamePause:Hide()
+    self.base.Hide(self)
+end

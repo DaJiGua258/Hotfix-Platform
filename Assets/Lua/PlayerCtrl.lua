@@ -7,6 +7,23 @@ require("FSM/FallState")
 
 Object:subClass("PlayerCtrl")
 
+-- 触发处理（全局函数，由 PlayerMotor.OnTriggerEnter 调用）
+function OnPlayerTrigger(obj)
+    
+    if obj.tag == "Flag" then
+        SceneData:SaveData()
+        GameOver:Show()
+        GamePanel:SetVCamActive(false)
+        CS.UnityEngine.Time.timeScale = 0
+        isGameOver = true
+
+    elseif obj.tag == "Coin" then
+        SceneData:AddCoin()
+        GamePanel:AddCoin()
+        obj:SetActive(false)
+    end
+end
+
 function PlayerCtrl:new()
     local obj = Object.new(self)
 
@@ -26,6 +43,7 @@ function PlayerCtrl:new()
 end
 
 function PlayerCtrl:Update()
+    if isGameOver then return end
     self.stateMachine:Update(self)
 end
 

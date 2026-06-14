@@ -42,13 +42,15 @@ public class ABMgr : SingletonAutoMono<ABMgr>
     {
         get
         {
-#if UNITY_IOS
-            return "IOS";
-#elif UNITY_ANDROID
-            return "Android";
-#else
+            //直接基于StreamingAssets下的PC包读取，不区分平台
+            //#if UNITY_IOS
+            //    return "IOS";
+            //#elif UNITY_ANDROID
+            //    return "Android";
+            //#else
+            //    return "PC";
+            //endif
             return "PC";
-#endif
         }
     }
 

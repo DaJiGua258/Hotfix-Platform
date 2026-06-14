@@ -22,9 +22,7 @@ public class PlayerMotor : MonoBehaviour
     [SerializeField] private float _gravity = -20f;  // 重力加速度（负值）
 
     [Header("地面检测")]
-    [SerializeField] private float _groundCheckDistance = 0.12f;  // 检测射线长度
-    [SerializeField] private float _groundCheckOffsetY = 0f;  // 射线起始点 Y 偏移
-    [SerializeField] private LayerMask _groundLayer = -1;  // 地面层级
+    [SerializeField] private float _groundCheckDistance = 0.12f;  // 检测射线长度（仅 Gizmo 显示用）
 
     [Header("旋转参数")]
     [SerializeField] private float _rotationSpeed = 15f;  // 转向平滑速度
@@ -37,6 +35,7 @@ public class PlayerMotor : MonoBehaviour
     [SerializeField] private ParticleSystem _landVFX;  // 落地瞬间播放
 
     [Header("跳跃与落地拉伸/挤压")]
+    [SerializeField] private Transform _squashTarget;  // 弹跳形变目标（为空则用自身）
     [SerializeField] private float _squashEaseIn = 0.05f;  // 形变渐入时间（跳跃/落地）
     [SerializeField] private float _squashDuration = 0.2f;  // 弹性恢复时间
     [SerializeField] private Vector3 _stretchScale = new Vector3(0.75f, 1.25f, 0.75f);  // 起跳拉伸倍数
@@ -51,8 +50,9 @@ public class PlayerMotor : MonoBehaviour
 
     #region ----- 私有字段 -------------------------
 
-    private CapsuleCollider _col;
+    private CharacterController _charController;
     private Transform _mainCamera;
+    private Transform _squashTransform;  // 实际执行形变的 Transform
     private Vector3 _velocity;  // 当前速度向量
     private Vector3 _moveInput;  // 当前帧移动输入方向
     private bool _isSprinting;
@@ -75,9 +75,9 @@ public class PlayerMotor : MonoBehaviour
 
     void Awake()
     {
-        _col = GetComponent<CapsuleCollider>();
-        if (_col == null)
-            _col = gameObject.AddComponent<CapsuleCollider>();
+        _charController = GetComponent<CharacterController>();
+        if (_charController == null)
+            _charController = gameObject.AddComponent<CharacterController>();
 
         Camera cam = Camera.main;
         if (cam != null)
@@ -86,7 +86,8 @@ public class PlayerMotor : MonoBehaviour
         if (_animator == null)
             _animator = GetComponent<Animator>();
 
-        _originalScale = transform.localScale;
+        _squashTransform = _squashTarget != null ? _squashTarget : transform;
+        _originalScale = _squashTransform.localScale;
     }
 
     void Update()
@@ -107,7 +108,7 @@ public class PlayerMotor : MonoBehaviour
         LuaTable global = LuaMgr.GetInstance().Global;
         LuaFunction fn = global.Get<LuaFunction>("OnPlayerTrigger");
         if (fn != null)
-            fn.Call(other.tag);
+            fn.Call(other.gameObject);
     }
 
     #endregion
@@ -115,30 +116,27 @@ public class PlayerMotor : MonoBehaviour
     #region ----- 物理运算 -------------------------
 
     /// <summary>
-    /// 从脚底发射射线检测地面
+    /// CharacterController.isGrounded 检测地面
     /// 落地时归零垂直速度并贴地
     /// </summary>
     private void CheckGround()
     {
-        // 计算胶囊体底部位置，加上 Y 偏移
-        float halfHeight = _col.height * 0.5f;
-        Vector3 origin = transform.position + Vector3.up * _groundCheckOffsetY
-                       + Vector3.down * (halfHeight - _col.radius);
-
-        _isGrounded = Physics.Raycast(origin, Vector3.down, _groundCheckDistance, _groundLayer);
+        _isGrounded = _charController.isGrounded;
 
         // 落地处理：归零垂直速度
         if (_isGrounded && _velocity.y < 0)
         {
-            _velocity.y = 0;
+            float fallSpeed = _velocity.y;  // 记录下落速度，用于判断是否为真正落地
+            _velocity.y = -2;  // 贴地力
 
             // 落地 squash → 渐入形变 → 弹性回正
-            if (!_wasGrounded)
+            // fallSpeed < -3 过滤掉地面抖动导致的误触发
+            if (!_wasGrounded && fallSpeed < -3f)
             {
                 _scaleTween.Kill();
                 var seq = DOTween.Sequence();
-                seq.Append(transform.DOScale(Vector3.Scale(_originalScale, _squashScale), _squashEaseIn));
-                seq.Append(transform.DOScale(_originalScale, _squashDuration).SetEase(Ease.OutBack));
+                seq.Append(_squashTransform.DOScale(Vector3.Scale(_originalScale, _squashScale), _squashEaseIn));
+                seq.Append(_squashTransform.DOScale(_originalScale, _squashDuration).SetEase(Ease.OutBack));
                 _scaleTween = seq;
 
                 if (_landVFX != null)
@@ -174,11 +172,11 @@ public class PlayerMotor : MonoBehaviour
     }
 
     /// <summary>
-    /// 将最终速度应用到 Transform
+    /// 将最终速度通过 CharacterController 应用（自动处理碰撞）
     /// </summary>
     private void ApplyMovement()
     {
-        transform.position += _velocity * Time.deltaTime;
+        _charController.Move(_velocity * Time.deltaTime);
     }
 
     /// <summary>
@@ -266,8 +264,8 @@ public class PlayerMotor : MonoBehaviour
             // 起跳 stretch → 渐入形变 → 弹性回正
             _scaleTween.Kill();
             var seq = DOTween.Sequence();
-            seq.Append(transform.DOScale(Vector3.Scale(_originalScale, _stretchScale), _squashEaseIn));
-            seq.Append(transform.DOScale(_originalScale, _squashDuration).SetEase(Ease.OutBack));
+            seq.Append(_squashTransform.DOScale(Vector3.Scale(_originalScale, _stretchScale), _squashEaseIn));
+            seq.Append(_squashTransform.DOScale(_originalScale, _squashDuration).SetEase(Ease.OutBack));
             _scaleTween = seq;
         }
     }
@@ -279,8 +277,8 @@ public class PlayerMotor : MonoBehaviour
     {
         _scaleTween.Kill();
         var seq = DOTween.Sequence();
-        seq.Append(transform.DOScale(Vector3.Scale(_originalScale, _bobScale), _bobEaseIn));
-        seq.Append(transform.DOScale(_originalScale, _bobDuration).SetEase(Ease.OutBack));
+        seq.Append(_squashTransform.DOScale(Vector3.Scale(_originalScale, _bobScale), _bobEaseIn));
+        seq.Append(_squashTransform.DOScale(_originalScale, _bobDuration).SetEase(Ease.OutBack));
         _scaleTween = seq;
     }
 
@@ -319,10 +317,9 @@ public class PlayerMotor : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        if (_col == null) return;
+        if (_charController == null) return;
 
-        float halfHeight = _col.height * 0.5f;
-        Vector3 origin = transform.position + Vector3.down * (halfHeight - _col.radius);
+        Vector3 origin = transform.position + Vector3.down * (_charController.height * 0.5f);
 
         // 绿色=在地面，红色=在空中
         Gizmos.color = _isGrounded ? Color.green : Color.red;

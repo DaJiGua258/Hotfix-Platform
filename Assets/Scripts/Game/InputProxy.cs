@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// 每帧收集玩家输入缓存到属性，供 Lua 读取
@@ -20,11 +22,18 @@ public class InputProxy : MonoBehaviour
         _asset = _playerInput.actions;
     }
 
-    // void Update()
-    // {
-    //     if(MoveVec != Vector2.zero)
-    //     {
-    //         Debug.Log(MoveVec);
-    //     }
-    // }
+    void Update()
+    {
+        // if(MoveVec != Vector2.zero)
+        // {
+        //     Debug.Log(MoveVec);
+        // }
+    
+        // Input.GetKeyDown(KeyCode.Escape);
+        // Instantiate
+        // Text text = GameObject.Find("Text").GetComponent<Text>();
+        // text.text = MoveVec.ToString();
+        // Sprite sprite = GameObject.Find("Sprite").GetComponent<Image>().sprite;
+        // SceneManager.LoadScene
+    }
 }
