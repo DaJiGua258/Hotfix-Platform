@@ -1,0 +1,21 @@
+ManifestFileVersion: 0
+CRC: 3747289179
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: ui
+      Dependencies: {}
+    Info_1:
+      Name: scene
+      Dependencies: {}
+    Info_2:
+      Name: game
+      Dependencies: {}
+    Info_3:
+      Name: level
+      Dependencies:
+        Dependency_0: scene
+        Dependency_1: game
+    Info_4:
+      Name: lua
+      Dependencies: {}

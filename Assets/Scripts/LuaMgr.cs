@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using XLua;
+using DG.Tweening;
 
 /// <summary>
 /// Lua管理器
@@ -21,9 +22,14 @@ public class LuaMgr : BaseManager<LuaMgr>
     {
         //唯一的解析器
         luaEnv = new LuaEnv();
-        
+
+        // 注册 AB 场景加载函数到 Lua 全局，支持热更场景切换
+        luaEnv.Global.Set("LoadSceneFromAB",
+            (Action<string, string>)((abName, sceneName) =>
+                ABMgr.GetInstance().LoadSceneFromAB(abName, sceneName)));
+
         //添加重定向委托函数
-        luaEnv.AddLoader(MyCustomLoader);
+        // luaEnv.AddLoader(MyCustomLoader);
         luaEnv.AddLoader(MyCustomLoaderFormAB);
 
         //加载统一帧更新调度器，缓存 Tick 函数
@@ -90,12 +96,17 @@ public class LuaMgr : BaseManager<LuaMgr>
     //再写一个Load 用于从AB包加载Lua文件
     private byte[] MyCustomLoaderFormAB(ref string filepath)
     {
-        //改为我们的AB包管理器加载
-        TextAsset file2 = ABMgr.GetInstance().LoadRes<TextAsset>("lua", filepath + ".lua");
+        // 改为我们的AB包管理器加载
+        // AB 包中 asset 为 flat 结构（无子目录），取文件名即可
+        string fileName = Path.GetFileName(filepath);
+        TextAsset file2 = ABMgr.GetInstance().LoadRes<TextAsset>("lua", fileName + ".lua.txt");
         if (file2 != null)
             return file2.bytes;
         else
-            Debug.Log("MyCustomLoaderFormAB重定向失败");
+        {
+            Debug.Log("MyCustomLoaderFormAB重定向失败：" + filepath + " → " + fileName + ".lua.txt");
+            ABMgr.GetInstance().PrintABAssets("lua");
+        }
         return null;
     }
 
@@ -133,6 +144,50 @@ public class LuaMgr : BaseManager<LuaMgr>
         luaDestroy = null;
         luaEnv.Tick();
         luaEnv.Dispose();
+    }
+
+    // 启动协程重建 Lua 环境（由 GameManager 在 OnSceneUnloaded 中调用）
+    public void DoRestart(Action onCompleted)
+    {
+        if (driver != null)
+            driver.StartCoroutine(RestartCoroutine(onCompleted));
+    }
+
+    private IEnumerator RestartCoroutine(Action onCompleted)
+    {
+        // 断开 Lua 函数引用
+        luaStart = null;
+        luaUpdate = null;
+        luaDestroy = null;
+
+        // 清理按钮监听（Button.onClick 可能持有 Lua 委托）
+        foreach (var btn in GameObject.FindObjectsOfType<UnityEngine.UI.Button>(true))
+            btn.onClick.RemoveAllListeners();
+
+        // 释放所有 DOTween 回调
+        DOTween.KillAll(false, false);
+
+        // 销毁驱动（Destroy 在本帧末尾才真正执行）
+        if (driver != null)
+            GameObject.Destroy(driver.gameObject);
+
+        // 等一帧，让 Destroy 队列处理完
+        yield return null;
+
+        // 双轮 GC：一轮回收 + 一轮回收 Finalizer 产生的新垃圾
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+
+        luaEnv.Tick();
+        luaEnv.Dispose();
+        luaEnv = null;
+
+        Init();
+
+        // 通知调用方完成（GameManager 在此回调中 SetToLua + DoLuaFile）
+        onCompleted?.Invoke();
     }
 }
 

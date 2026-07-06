@@ -15,6 +15,7 @@ public class InputProxy : MonoBehaviour
     public bool IsJumpPressed => _asset["Jump"].WasPressedThisFrame();
     public bool IsSprintHeld => _asset["Sprint"].ReadValue<float>() > 0.5f;
     public bool IsPausePressed => _asset["Pause"].WasPressedThisFrame();
+    public bool IsDashPressed => _asset["Sprint"].WasPressedThisFrame();
 
     void Awake()
     {

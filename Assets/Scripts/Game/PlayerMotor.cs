@@ -33,6 +33,8 @@ public class PlayerMotor : MonoBehaviour
     [SerializeField] private ParticleSystem _footstepVFX;  // 地面时自动开启 Emission
     [Header("落地粒子")]
     [SerializeField] private ParticleSystem _landVFX;  // 落地瞬间播放
+    [Header("冲刺粒子")]
+    [SerializeField] private ParticleSystem _dashVFX;  // 冲刺瞬间播放
 
     [Header("跳跃与落地拉伸/挤压")]
     [SerializeField] private Transform _squashTarget;  // 弹跳形变目标（为空则用自身）
@@ -227,6 +229,10 @@ public class PlayerMotor : MonoBehaviour
     /// <param name="z">前后方向 -1~1</param>
     public void Move(Vector2 input)
     {
+        // 相机可能被 Lua 销毁重建，失效时重新查找
+        if (_mainCamera == null)
+            _mainCamera = Camera.main?.transform;
+
         if (_mainCamera != null)
         {
             // 以相机朝向为参考系转换输入方向
@@ -271,6 +277,21 @@ public class PlayerMotor : MonoBehaviour
     }
 
     /// <summary>
+    /// 空中跳跃（二段跳），无视地面检测
+    /// </summary>
+    public void AirJump()
+    {
+        _velocity.y = _jumpForce;
+        _isGrounded = false;
+
+        _scaleTween.Kill();
+        var seq = DOTween.Sequence();
+        seq.Append(_squashTransform.DOScale(Vector3.Scale(_originalScale, _stretchScale), _squashEaseIn));
+        seq.Append(_squashTransform.DOScale(_originalScale, _squashDuration).SetEase(Ease.OutBack));
+        _scaleTween = seq;
+    }
+
+    /// <summary>
     /// 脚步触发的 bob，给 Animation Event 调用
     /// </summary>
     public void OnStep()
@@ -292,12 +313,23 @@ public class PlayerMotor : MonoBehaviour
     }
 
     /// <summary>
+    /// 播放冲刺粒子
+    /// </summary>
+    public void PlayDashVFX()
+    {
+        if (_dashVFX != null)
+            _dashVFX.Play();
+    }
+
+    /// <summary>
     /// 传送角色到指定位置（重生用）
     /// </summary>
     /// <param name="pos">目标位置</param>
     public void Teleport(Vector3 pos)
     {
+        _charController.enabled = false;
         transform.position = pos;
+        _charController.enabled = true;
         _velocity = Vector3.zero;
         Move(Vector2.zero);
     }
@@ -309,6 +341,14 @@ public class PlayerMotor : MonoBehaviour
     {
         _velocity = Vector3.zero;
         Move(Vector2.zero);
+    }
+
+    /// <summary>
+    /// 直接设置速度向量（突进、击飞等 Lua 侧需要爆发式运动时使用）
+    /// </summary>
+    public void SetVelocity(Vector3 vel)
+    {
+        _velocity = vel;
     }
 
     #endregion

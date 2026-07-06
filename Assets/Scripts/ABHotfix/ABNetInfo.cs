@@ -4,6 +4,9 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace ABToolPackage
 {
@@ -11,10 +14,83 @@ namespace ABToolPackage
     {
         public static string compareFileName = "/ABCompareFile.txt";
         public static string compareFileNameTMP = "/ABCompareFile_TMP.txt";
-        public static string serverIP = "ftp://127.0.0.1";
-        public static string userName = "user";
-        public static string passWord = "123456";
-        public static string aBFileDir = "";
+
+        private const string PrefsKey_IP = "ABTool_serverIP";
+        private const string PrefsKey_User = "ABTool_userName";
+        private const string PrefsKey_Pwd = "ABTool_passWord";
+        private const string PrefsKey_Dir = "ABTool_aBFileDir";
+
+        public static string serverIP
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return EditorPrefs.GetString(PrefsKey_IP, "ftp://127.0.0.1");
+#else
+                return "ftp://127.0.0.1";
+#endif
+            }
+            set
+            {
+#if UNITY_EDITOR
+                EditorPrefs.SetString(PrefsKey_IP, value);
+#endif
+            }
+        }
+
+        public static string userName
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return EditorPrefs.GetString(PrefsKey_User, "user");
+#else
+                return "user";
+#endif
+            }
+            set
+            {
+#if UNITY_EDITOR
+                EditorPrefs.SetString(PrefsKey_User, value);
+#endif
+            }
+        }
+
+        public static string passWord
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return EditorPrefs.GetString(PrefsKey_Pwd, "123456");
+#else
+                return "123456";
+#endif
+            }
+            set
+            {
+#if UNITY_EDITOR
+                EditorPrefs.SetString(PrefsKey_Pwd, value);
+#endif
+            }
+        }
+
+        public static string aBFileDir
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return EditorPrefs.GetString(PrefsKey_Dir, "");
+#else
+                return "";
+#endif
+            }
+            set
+            {
+#if UNITY_EDITOR
+                EditorPrefs.SetString(PrefsKey_Dir, value);
+#endif
+            }
+        }
 
         /// <summary>
         /// 依据路径的目标文件，返回一串MD5码

@@ -1,0 +1,102 @@
+ManifestFileVersion: 0
+CRC: 1029894939
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 6a881586faa1befca63e8facda5d14f7
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 3950332ff55bd03ded636ee5b1a8af6d
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 20
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 81
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 45e653bab7fb20e499bda25e1b646fea, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: ac0b09e7857660247b1477e93731de29, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 3508d1ee0a47e2e419db5bd9e26abe42, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 6ad980451443d70438faac0bc6c235a0, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 39fa3d8997a24136984ca6e2c99902bc, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 3c9beda531928fc40968802117a5d256, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 72ece51f2901e7445ab60da3685d6b5f, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: c2b30a19dc9cbe044b97618992b24a10, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 137
+  Script: {instanceID: 0}
+- Class: 143
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: Cinemachine
+  ClassName: Cinemachine.AxisState
+- AssemblyName: Cinemachine
+  ClassName: Cinemachine.AxisState/Recentering
+- AssemblyName: Cinemachine
+  ClassName: Cinemachine.CinemachineBlendDefinition
+- AssemblyName: Cinemachine
+  ClassName: Cinemachine.CinemachineBrain/BrainEvent
+- AssemblyName: Cinemachine
+  ClassName: Cinemachine.CinemachineBrain/VcamActivatedEvent
+- AssemblyName: Cinemachine
+  ClassName: Cinemachine.CinemachineVirtualCameraBase/TransitionParams
+- AssemblyName: Cinemachine
+  ClassName: Cinemachine.LensSettings
+- AssemblyName: Unity.InputSystem
+  ClassName: UnityEngine.InputSystem.InputAction
+- AssemblyName: Unity.InputSystem
+  ClassName: UnityEngine.InputSystem.InputActionMap
+- AssemblyName: Unity.InputSystem
+  ClassName: UnityEngine.InputSystem.InputBinding
+- AssemblyName: Unity.InputSystem
+  ClassName: UnityEngine.InputSystem.PlayerInput/ControlsChangedEvent
+- AssemblyName: Unity.InputSystem
+  ClassName: UnityEngine.InputSystem.PlayerInput/DeviceLostEvent
+- AssemblyName: Unity.InputSystem
+  ClassName: UnityEngine.InputSystem.PlayerInput/DeviceRegainedEvent
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.PersistentCallGroup
+Assets:
+- Assets/Prefab/Game/Camera.prefab
+- Assets/Prefab/Game/Coin.prefab
+- Assets/Prefab/Game/CoinRoot.prefab
+- Assets/Prefab/Game/Player.prefab
+Dependencies: []

@@ -70,7 +70,7 @@ namespace ABToolPackage
             });
         }
 
-        public async void CheckUpdate()
+        public async void CheckUpdate(Action onCompleted = null)
         {
             string remoteInfo = "";
 
@@ -109,6 +109,7 @@ namespace ABToolPackage
             AddTask(async () =>
             {
                 print("7. 开始：下载AB包...");
+                print("下载路径：" + Application.persistentDataPath);
                 await DownloadABFiles();
             });
 
@@ -127,6 +128,8 @@ namespace ABToolPackage
             {
                 await task();
             }
+
+            onCompleted?.Invoke();
         }
 
         #endregion
@@ -140,15 +143,15 @@ namespace ABToolPackage
         /// <param name="fileName"></param>
         /// <param name="localPath"></param>
         /// <returns></returns>
-        public bool DownLoadFile(string fileName, string localPath)
+        public bool DownLoadFile(string fileName, string localPath, string serverIP, string userName, string passWord)
         {
             try
             {
-                // 1. 创建FTP连接 
-                FtpWebRequest req = FtpWebRequest.Create(ABNetInfo.serverIP + "/" + fileName) as FtpWebRequest;
+                // 1. 创建FTP连接
+                FtpWebRequest req = FtpWebRequest.Create(serverIP + "/" + fileName) as FtpWebRequest;
 
                 // 2. 设置通信凭证
-                NetworkCredential n = new NetworkCredential(ABNetInfo.userName, ABNetInfo.passWord);
+                NetworkCredential n = new NetworkCredential(userName, passWord);
                 req.Credentials = n;
 
                 // 3. 设置链接配置
@@ -196,11 +199,14 @@ namespace ABToolPackage
         /// </summary>
         private async Task DownRemoteCompareFile()
         {
-            // 该地址只能从主线程调用，所以放到外面
-            string path = Application.persistentDataPath;  
+            // 只能从主线程调用，所以放到外面
+            string path = Application.persistentDataPath;
+            string ip = ABNetInfo.serverIP;
+            string user = ABNetInfo.userName;
+            string pwd = ABNetInfo.passWord;
             await Task.Run(() =>
             {
-                DownLoadFile(ABNetInfo.compareFileName, path + ABNetInfo.compareFileNameTMP);
+                DownLoadFile(ABNetInfo.compareFileName, path + ABNetInfo.compareFileNameTMP, ip, user, pwd);
             });
         }
 
@@ -300,6 +306,11 @@ namespace ABToolPackage
         /// <returns></returns>
         private async Task DownloadABFiles()
         {
+            // 只能从主线程调用，所以放到外面
+            string ip = ABNetInfo.serverIP;
+            string user = ABNetInfo.userName;
+            string pwd = ABNetInfo.passWord;
+
             // 遍历下载列表进行下载
             foreach(var abName in downloadList)
             {
@@ -308,7 +319,7 @@ namespace ABToolPackage
                 // 异步下载
                 await Task.Run(() =>
                 {
-                    DownLoadFile(abName, path);
+                    DownLoadFile(abName, path, ip, user, pwd);
                 });
             }
         }

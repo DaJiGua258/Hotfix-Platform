@@ -1,0 +1,37 @@
+ManifestFileVersion: 0
+CRC: 337022046
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 501d07ad89fca5db047232ce6444dccb
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 5ad585dd02dfb5016c0dad519eab8f49
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/LuaTxt/MainPanel.lua.txt
+- Assets/LuaTxt/PlayerCtrl.lua.txt
+- Assets/LuaTxt/RunState.lua.txt
+- Assets/LuaTxt/IdleState.lua.txt
+- Assets/LuaTxt/StateMachine.lua.txt
+- Assets/LuaTxt/JumpState.lua.txt
+- Assets/LuaTxt/GamePause.lua.txt
+- Assets/LuaTxt/State.lua.txt
+- Assets/LuaTxt/FallState.lua.txt
+- Assets/LuaTxt/BasePanel.lua.txt
+- Assets/LuaTxt/Object.lua.txt
+- Assets/LuaTxt/GameOver.lua.txt
+- Assets/LuaTxt/Fade.lua.txt
+- Assets/LuaTxt/Coin.lua.txt
+- Assets/LuaTxt/Main.lua.txt
+- Assets/LuaTxt/GameLoop.lua.txt
+- Assets/LuaTxt/DashState.lua.txt
+- Assets/LuaTxt/Test.lua.txt
+- Assets/LuaTxt/GamePanel.lua.txt
+- Assets/LuaTxt/SceneData.lua.txt
+- Assets/LuaTxt/LevelSelect.lua.txt
+Dependencies: []
