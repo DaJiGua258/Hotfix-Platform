@@ -2,8 +2,10 @@
 Object:subClass("BasePanel")
 
 BasePanel.panelObj = nil
+
 --相当于模拟一个字典 键为 控件名 值为控件本身
 BasePanel.controls = {}
+
 --事件监听标识
 BasePanel.isInitEvent = false
 

@@ -94,12 +94,17 @@ public class LuaMgr : BaseManager<LuaMgr>
     }
 
     //再写一个Load 用于从AB包加载Lua文件
+    /// <summary>
+    /// 自定义从AB包中加载资源的方法
+    /// </summary>
+    /// <param name="filepath">原始文件路径</param>
+    /// <returns>返回加载到的字节数组，如果加载失败则返回null</returns>
     private byte[] MyCustomLoaderFormAB(ref string filepath)
     {
         // 改为我们的AB包管理器加载
         // AB 包中 asset 为 flat 结构（无子目录），取文件名即可
-        string fileName = Path.GetFileName(filepath);
-        TextAsset file2 = ABMgr.GetInstance().LoadRes<TextAsset>("lua", fileName + ".lua.txt");
+        string fileName = Path.GetFileName(filepath);  // 从完整路径中提取文件名
+        TextAsset file2 = ABMgr.GetInstance().LoadRes<TextAsset>("lua", fileName + ".lua.txt");  // 通过AB包管理器加载lua资源
         if (file2 != null)
             return file2.bytes;
         else

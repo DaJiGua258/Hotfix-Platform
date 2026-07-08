@@ -88,20 +88,20 @@ namespace ABToolPackage
         {
             // 通过编辑器Selection类中的方法 获取再Project窗口中选中的资源
             UnityEngine.Object[] selectedAssets = Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.DeepAssets);
-            if(selectedAssets.Length == 0)
+            if (selectedAssets.Length == 0)
             {
                 return;
             }
 
             // 遍历选中的资源对象
-            foreach(UnityEngine.Object asset in selectedAssets)
+            foreach (UnityEngine.Object asset in selectedAssets)
             {
                 // 获取 当前 完整路径，以及文件名称
                 string filePath = AssetDatabase.GetAssetPath(asset);
                 string fileName = filePath.Substring(filePath.LastIndexOf('/'));
 
                 // 对于有后缀的（非AB包文件）跳过
-                if(fileName.IndexOf(".") != -1) continue;
+                if (fileName.IndexOf(".") != -1) continue;
 
                 // 获取 目标 完整路径
                 string newPath = "Assets/StreamingAssets" + fileName;
@@ -128,7 +128,7 @@ namespace ABToolPackage
             // 遍历制定类型文件并上传
             foreach (var info in fileInfos)
             {
-                if(info.Extension == "" || info.Extension == ".txt")
+                if (info.Extension == "" || info.Extension == ".txt")
                 {
                     FtpUploadFile(info.FullName, info.Name);
                 }
@@ -193,22 +193,27 @@ namespace ABToolPackage
 
         #region 工具类
 
-
         /// <summary>
-        /// 依据传入的文件夹路径生成当前文件夹下的对比文件
+        /// 创建AB包对比文件，用于记录指定目录下所有无扩展名文件的名称、大小和MD5值
         /// </summary>
-        /// <param name="dirPath"></param>
+        /// <param name="dirPath">要扫描的目录路径</param>
         private void CreateABCompareFile(string dirPath)
         {
+            // 创建目录信息对象
             DirectoryInfo dir = new DirectoryInfo(dirPath);
+            // 获取目录下所有文件信息
             FileInfo[] fileInfos = dir.GetFiles();
 
+            // 初始化用于存储对比信息的字符串
             string compareInfo = "";
 
+            // 遍历目录下的所有文件
             foreach (var info in fileInfos)
             {
-                if(info.Extension != "") continue;
+                // 跳过有扩展名的文件
+                if (info.Extension != "") continue;
 
+                // 拼接文件信息：文件名_文件大小_MD5值
                 compareInfo += info.Name + "_" + info.Length + "_" + ABNetInfo.GetMD5(info.FullName);
                 compareInfo += '\n';
             }
@@ -245,7 +250,7 @@ namespace ABToolPackage
 
                     // 2. 设置通信凭证
                     NetworkCredential n = new NetworkCredential(userName, passWord);
-                    req.Credentials = n;
+                    req.Credentials = n;  // 登录时使用这个身份
 
                     // 3. 设置链接配置
                     req.Proxy = null;  // 设置代理为null
@@ -255,15 +260,17 @@ namespace ABToolPackage
                     req.UsePassive = true;  // 使用被动模式
 
                     // 4. 上传文件
+                    // 和FTP服务器建立连接,并返回一个"写入流"(Stream)
+                    // 之后往这个流里写入的所有字节,都会被发送给服务器,最终保存成服务器上的目标文件
                     Stream upLoadStream = req.GetRequestStream();
 
                     // 读取文件，写入流对象
-                    using(FileStream file = File.OpenRead(filePath))
+                    using (FileStream file = File.OpenRead(filePath))
                     {
                         byte[] buffer = new byte[2048];  // 定义一个缓冲区
                         int contentLength = file.Read(buffer, 0, buffer.Length);  // 第一次从文件读取到缓冲区，并返回实际的读取长度
 
-                        while(contentLength != 0)
+                        while (contentLength != 0)
                         {
                             // 从 buffer 中提取之前获取到的 contentLength 长度的所有字节，写入到上传流中
                             upLoadStream.Write(buffer, 0, contentLength);
@@ -276,7 +283,7 @@ namespace ABToolPackage
 
                     Debug.Log("上传成功：" + fileName);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Debug.Log("上传失败：" + fileName + '\n' + ex);
                 }

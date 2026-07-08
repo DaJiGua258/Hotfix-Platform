@@ -61,8 +61,14 @@ namespace ABToolPackage
         {
             _taskList.Add(task);
         }
+        /// <summary>
+        /// 添加一个任务到任务列表中
+        /// </summary>
+        /// <param name="action">要执行的操作，类型为Action</param>
         private void AddTask(Action action)
         {
+            // 将传入的action包装成一个Task并添加到任务列表中
+            // 包装后的action在执行后会返回一个已完成的Task
             _taskList.Add(() =>
             {
                 action();
@@ -78,12 +84,13 @@ namespace ABToolPackage
             localABInfoDic.Clear();
             downloadList.Clear();
 
-            AddTask(async () =>
+            AddTask(async () => // 异步
             {
                 print("1. 开始：下载远端对比文件...");
                 await DownRemoteCompareFile();
                 print("2. 完成：远端对比文件下载...");
-            });  // 异步
+            });  
+
             AddTask(() =>  // 同步
             {
                 print("3. 开始：读取对比文件信息...");
@@ -106,7 +113,7 @@ namespace ABToolPackage
                 
             });
 
-            AddTask(async () =>
+            AddTask(async () =>  // 异步
             {
                 print("7. 开始：下载AB包...");
                 print("下载路径：" + Application.persistentDataPath);
@@ -157,7 +164,7 @@ namespace ABToolPackage
                 // 3. 设置链接配置
                 req.Proxy = null;  // 设置代理为null
                 req.KeepAlive = false;  // 请求完毕后 是否关闭控制连接
-                req.Method = WebRequestMethods.Ftp.DownloadFile;  // 操作命令-上传
+                req.Method = WebRequestMethods.Ftp.DownloadFile;  // 操作命令-下载
                 req.UseBinary = true;  // 指定传输的类型 2进制
                 req.UsePassive = true;  // 使用被动模式
 
