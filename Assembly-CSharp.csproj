@@ -95,7 +95,6 @@
      <Compile Include="Assets\XLua\Src\StaticLuaCallbacks.cs" />
      <None Include="Assets\XLua\Examples\07_AsyncTest\Resources\async_test.lua.txt" />
      <None Include="Assets\XLua\Tutorial\LoadLuaScript\ByFile\Resources\byfile.lua.txt" />
-     <None Include="Assets\AB\ABCompareFile.txt" />
      <None Include="Assets\LuaTxt\RunState.lua.txt" />
      <None Include="Assets\LuaTxt\Object.lua.txt" />
      <None Include="Assets\LuaTxt\Test.lua.txt" />
